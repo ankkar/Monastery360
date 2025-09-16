@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monastery360 - Find Your Sanctuary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Lora', serif;
+            background-color: #f8f7f4;
+            color: #3d4f4b;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+        .history-bg {
+            background-image: url('https://i.postimg.cc/fyXTmxDh/Gemini-Generated-Image-piifz9piifz9piif.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .theme-teal {
+            background-color: #145c57;
+        }
+        .theme-teal-text {
+            color: #145c57;
+        }
+        .theme-teal-border {
+            border-color: #145c57;
+        }
+        .theme-teal-hover:hover {
+            background-color: #0e423d;
+        }
+        .modal, #virtual-tours-page, #pannellum-viewer-page {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+        .sharp-image {
+            image-rendering: -webkit-optimize-contrast; /* For Safari/Chrome */
+            image-rendering: crisp-edges; /* For other browsers */
+        }
+        .thumbnail-gallery {
+            scrollbar-width: thin;
+            scrollbar-color: #145c57 #e2e8f0;
+        }
+        .thumbnail-gallery::-webkit-scrollbar {
+            height: 8px;
+        }
+        .thumbnail-gallery::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .thumbnail-gallery::-webkit-scrollbar-thumb {
+            background-color: #145c57;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+        .active-thumbnail {
+            border: 3px solid #145c57;
+            box-shadow: 0 0 8px rgba(20, 92, 87, 0.5);
+        }
+        #toast-notification.show {
+            transform: translateX(0);
+        }
+        /* Pannellum 360 Viewer Styles */
+        #panorama { width: 100vw; height: 100vh; }
+        #imgCounter { position: fixed; top: 15px; right: 20px; font-family: Arial, sans-serif; background: rgba(0,0,0,0.5); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 18px; z-index: 1000; user-select: none; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.7); }
+        
+        /* New Arrow Hotspot Styles */
+        .arrow-hotspot-custom {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            animation: pulse-arrow 2s infinite;
+        }
+        .arrow-hotspot-custom:hover {
+            background: rgba(0,0,0,0.7);
+            transform: scale(1.1);
+            animation-play-state: paused;
+        }
+        .arrow-hotspot-custom svg {
+            width: 60%;
+            height: 60%;
+            color: white;
+        }
+        @keyframes pulse-arrow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+    </style>
+    <script>
+        // Injected by server at runtime
+        window.__firebase_config = "__FIREBASE_CONFIG__";
+    </script>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 group cursor-pointer" id="sidebar-open-btn" title="Your portal to spiritual journeys. Take a virtual tour through tranquil monasteries in Sikkim and discover their sacred history and stunning architecture without leaving your home.">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-teal-800 group-hover:text-teal-600 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zM12 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path></svg>
+                <h1 class="text-2xl font-bold text-teal-800 group-hover:text-teal-600 transition">Monastery360</h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6" id="desktop-menu"></div>
+            <div class="flex items-center space-x-4">
+                <div id="user-actions">
+                    <button id="login-btn" class="text-teal-800 hover:text-teal-600 font-semibold transition">Log In</button>
+                    <button id="signup-btn" class="bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded-lg transition">Sign Up</button>
+                </div>
+                <div id="user-greeting" class="hidden">
+                    <span id="greeting-text" class="font-semibold text-teal-800"></span>
+                    <button id="logout-btn" class="ml-4 text-sm text-red-600 hover:text-red-800 font-semibold transition">Logout</button>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-teal-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="fixed inset-0 z-50 hidden">
+        <div id="sidebar-overlay" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300"></div>
+        <div id="sidebar" class="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6 transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-teal-800">Menu</h2>
+                <button id="sidebar-close-btn" class="text-gray-500 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="#" id="home-link-sidebar" class="text-lg text-gray-700 hover:text-teal-600 font-semibold transition-colors">Home</a>
+                <a href="#" id="discover-link-sidebar" class="text-lg text-gray-700 hover:text-teal-600 font-semibold transition-colors">Discover</a>
+                <a href="#" class="text-lg text-gray-700 hover:text-teal-600 font-semibold transition-colors">Articles</a>
+                <a href="#" class="text-lg text-gray-700 hover:text-teal-600 font-semibold transition-colors">About Us</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section id="hero-section" class="text-white relative h-[500px] md:h-[650px] overflow-hidden">
+            <div id="hero-slides-container" class="h-full w-full flex transition-transform duration-1000 ease-in-out">
+                <!-- Slides will be injected here by JS -->
+            </div>
+            <div class="absolute inset-0 bg-black/50 z-10"></div>
+            <div class="absolute inset-0 z-20 flex flex-col justify-center items-center">
+                <div class="container mx-auto px-6 text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">Find Your Sanctuary</h1>
+                    <p class="text-lg md:text-xl mb-8">Discover serene monasteries and spiritual centers in Sikkim.</p>
+                    <div class="max-w-xl mx-auto">
+                        <div class="flex items-center bg-white rounded-full shadow-lg p-2">
+                            <input type="text" placeholder="Search by name or location" class="w-full bg-transparent px-4 py-2 text-gray-800 focus:outline-none">
+                            <button class="bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-6 rounded-full transition">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="hero-prev-btn" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 focus:outline-none transition z-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+            <button id="hero-next-btn" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 focus:outline-none transition z-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+            <button id="virtual-tour-btn" class="absolute top-6 right-6 bg-white/20 backdrop-blur-sm text-white font-bold py-2 px-4 rounded-lg border border-white/30 group hover:bg-white/30 transition-all duration-300 z-20">
+                <span class="group-hover:hidden">Virtual Tours</span>
+                <span class="hidden group-hover:inline">Enter 360° Virtual Tour!</span>
+            </button>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-bg text-white relative py-20">
+            <div class="absolute inset-0 bg-teal-900/80"></div>
+            <div class="container mx-auto px-6 relative z-10">
+                <h2 class="text-4xl font-bold text-center mb-4">Living Treasures of the Himalayas</h2>
+                <p class="text-center text-lg text-gray-200 mb-12 max-w-3xl mx-auto">Sikkim, often called the “Land of Monasteries,” is home to over 200 living museums of art, history, and tradition that have shaped its identity for centuries.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div class="bg-black/20 p-6 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-4 border-b-2 border-teal-400 pb-2">History & Origins</h3>
+                        <ul class="space-y-3 text-gray-300">
+                            <li><strong class="text-white">8th Century:</strong> Buddhism arrives with Guru Padmasambhava.</li>
+                            <li><strong class="text-white">1701:</strong> Dubdi, the oldest monastery, is established.</li>
+                            <li><strong class="text-white">Royal Patronage:</strong> Namgyal kings establish centers of culture.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-black/20 p-6 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-4 border-b-2 border-teal-400 pb-2">Culture & Architecture</h3>
+                        <ul class="space-y-3 text-gray-300">
+                            <li><strong class="text-white">Tibetan Influence:</strong> Strong roots in Nyingma and Kagyu sects.</li>
+                            <li><strong class="text-white">Vivid Artwork:</strong> Rich with murals, thangkas, and divine statues.</li>
+                            <li><strong class="text-white">Iconic Design:</strong> Multi-tiered roofs and traditional prayer wheels.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-black/20 p-6 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-4 border-b-2 border-teal-400 pb-2">Traditions & Practices</h3>
+                        <ul class="space-y-3 text-gray-300">
+                             <li><strong class="text-white">Monastic Life:</strong> A dedication to meditation and chanting.</li>
+                            <li><strong class="text-white">Cham Dances:</strong> Sacred masked dances during major festivals.</li>
+                            <li><strong class="text-white">Vibrant Festivals:</strong> Hubs of celebration with prayer flags.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Discover Page (Initially Hidden) -->
+    <section id="discover-page" class="hidden py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12 theme-teal-text">Discover the Monasteries of Sikkim</h2>
+            <div id="monastery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+        </div>
+    </section>
+
+     <!-- Virtual Tours Page (Initially Hidden) -->
+    <div id="virtual-tours-page" class="fixed inset-0 bg-gray-900/95 z-[60] hidden p-8 text-white transition-opacity duration-300 opacity-0">
+        <button id="close-vt-btn" class="absolute top-6 right-8 text-white/70 hover:text-white text-5xl font-light">&times;</button>
+        <div class="container mx-auto h-full flex flex-col">
+            <h2 class="text-4xl font-bold text-center mb-2 mt-4">360° Virtual Tours</h2>
+            <p class="text-center text-gray-400 mb-10">Step inside the monasteries from anywhere in the world.</p>
+            <div id="vt-grid-container" class="flex-grow overflow-y-auto">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pannellum 360 Viewer Page (Initially Hidden) -->
+    <div id="pannellum-viewer-page" class="fixed inset-0 z-[70] hidden bg-gray-900">
+        <div id="panorama"></div>
+        <div id="imgCounter"></div>
+        <button id="close-pannellum-btn" class="absolute top-4 right-6 text-white/70 hover:text-white text-5xl font-light z-[1002]">&times;</button>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-10 text-center">
+            <div>
+                <h3 class="text-xl font-bold mb-4">Monastery360</h3>
+                <p class="text-gray-400">Your comprehensive guide to the spiritual sanctuaries of Sikkim.</p>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-gray-500">
+                <p>&copy; 2025 Monastery360. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modals -->
+    <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl p-8 w-full max-w-md transform scale-95"><h2 class="text-2xl font-bold text-center mb-6">Log In</h2><form id="login-form"><div class="mb-4"><label for="login-email" class="block text-gray-700 font-semibold mb-2">Email Address</label><input type="email" id="login-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none" required></div><div class="mb-6"><label for="login-password" class="block text-gray-700 font-semibold mb-2">Password</label><input type="password" id="login-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none" required></div><button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded-lg transition">Log In</button></form><p id="login-error" class="text-red-500 text-center mt-4"></p><button class="modal-close-btn absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button></div></div>
+    <div id="signup-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl p-8 w-full max-w-md transform scale-95"><h2 class="text-2xl font-bold text-center mb-6">Create Account</h2><form id="signup-form"><div class="mb-4"><label for="signup-email" class="block text-gray-700 font-semibold mb-2">Email Address</label><input type="email" id="signup-email" class="w-full px-4 py-2 border rounded-lg focus:outline-none" required></div><div class="mb-6"><label for="signup-password" class="block text-gray-700 font-semibold mb-2">Password</label><input type="password" id="signup-password" class="w-full px-4 py-2 border rounded-lg focus:outline-none" required></div><button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded-lg transition">Sign Up</button></form><p id="signup-error" class="text-red-500 text-center mt-4"></p><button class="modal-close-btn absolute top-4 right-4 text-gray-500 hover:text-gray-800">&times;</button></div></div>
+    <div id="detail-modal" class="modal fixed inset-0 bg-black bg-opacity-60 z-[70] flex items-center justify-center p-4 hidden opacity-0"><div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] flex flex-col transform scale-95"><div class="p-6 border-b flex justify-between items-center"><h2 id="modal-title" class="text-2xl font-bold theme-teal-text"></h2><button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div class="p-6 overflow-y-auto"><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><div class="relative mb-4"><img id="modal-main-image" src="" alt="Monastery main image" class="w-full h-96 object-cover rounded-lg shadow-md sharp-image"><button id="prev-image-btn" class="absolute top-1/2 left-3 transform -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 focus:outline-none transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button><button id="next-image-btn" class="absolute top-1/2 right-3 transform -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 focus:outline-none transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button></div><div id="modal-thumbnail-gallery" class="thumbnail-gallery flex space-x-2 overflow-x-auto p-2"></div></div><div class="flex flex-col"><h3 class="text-xl font-bold mb-2">Location: <span id="modal-location" class="font-normal text-gray-700"></span></h3><p id="modal-description" class="text-gray-600 leading-relaxed flex-grow"></p></div></div></div></div></div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-teal-700 text-white py-3 px-5 rounded-lg shadow-lg transform translate-x-[calc(100%+20px)] transition-transform duration-500 ease-in-out z-[80]"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Monastery Data ---
+        const monasteries = [
+            { id: 1, name: "Rumtek Monastery (Dharma Chakra Centre)", location: "East Sikkim", description: "The most famous monastery in Sikkim, Rumtek is the seat of the Karmapa Lama. Known for its golden stupa, vibrant murals, and peaceful surroundings, it’s a spiritual and architectural marvel offering a deep dive into Tibetan Buddhist culture.", imageUrl: "https://i.postimg.cc/1579Sz9p/Screenshot-2025-09-13-144137.png", galleryUrls: ["https://i.postimg.cc/1579Sz9p/Screenshot-2025-09-13-144137.png", "https://i.postimg.cc/65p9FZNW/Screenshot-2025-09-13-144158.png", "https://i.postimg.cc/zDjzdj62/Screenshot-2025-09-13-144220.jpg"], view360Url: "#" },
+            { id: 2, name: "Lingdum Monastery (Ranka Monastery)", location: "East Sikkim", description: "A modern gem with traditional Tibetan architecture, Lingdum is set amidst scenic valleys. Its spacious courtyard often hosts young monks practicing rituals and prayers, making it a lively yet serene place to experience monastic life.", imageUrl: "https://i.postimg.cc/GpGrvJvQ/Screenshot-2025-09-13-203758.png", galleryUrls: ["https://i.postimg.cc/GpGrvJvQ/Screenshot-2025-09-13-203758.png", "https://i.postimg.cc/7ZCqZy6j/Screenshot-2025-09-13-203925.png", "https://i.postimg.cc/fR6D3gSy/Screenshot-2025-09-13-204005.png"], view360Url: "#" },
+            { id: 3, name: "Pemayangtse Monastery", location: "West Sikkim", description: "One of Sikkim’s oldest monasteries, Pemayangtse is famous for its breathtaking view of Mt. Kanchenjunga and its exquisite wooden structure “Zangdok Palri,” depicting Guru Padmasambhava’s heavenly abode. A must-visit for culture and nature lovers.", imageUrl: "https://i.postimg.cc/7ZTyyMtk/Screenshot-2025-09-13-205158.jpg", galleryUrls: ["https://i.postimg.cc/7ZTyyMtk/Screenshot-2025-09-13-205158.jpg", "https://i.postimg.cc/MG72nZ83/Screenshot-2025-09-13-205209.jpg", "https://i.postimg.cc/wB8Yxyns/Screenshot-2025-09-13-205221.jpg", "https://i.postimg.cc/KzmXBXGG/Screenshot-2025-09-13-205231.jpg"], view360Url: "#" },
+            { id: 4, name: "Dubdi Monastery", location: "West Sikkim", description: "Known as the “Hermit’s Cell,” Dubdi is the oldest monastery in Sikkim, built in 1701. Nestled in forests near Yuksom, it radiates history and tranquility, making it perfect for those seeking a spiritual escape off the beaten path.", imageUrl: "https://i.postimg.cc/ZRsfRX0D/Screenshot-2025-09-13-205722.jpg", galleryUrls: ["https://i.postimg.cc/ZRsfRX0D/Screenshot-2025-09-13-205722.jpg", "https://i.postimg.cc/cHL9dd1n/Screenshot-2025-09-13-205744.jpg", "https://i.postimg.cc/5yHsFpC9/Screenshot-2025-09-13-205758.jpg", "https://i.postimg.cc/Vv3D9Mqq/Screenshot-2025-09-13-210237.jpg"], view360Url: "#" },
+            { id: 5, name: "Tashiding Monastery", location: "West Sikkim", description: "Regarded as the 'Heart of Sikkim,' Tashiding Monastery is one of the most sacred pilgrimage sites...", imageUrl: "https://i.postimg.cc/jd6nRNyk/Whats-App-Image-2025-09-15-at-12-43-48-40b44eb8.jpg", galleryUrls: ["https://i.postimg.cc/jd6nRNyk/Whats-App-Image-2025-09-15-at-12-43-48-40b44eb8.jpg", "https://i.postimg.cc/05wJHhjv/Whats-App-Image-2025-09-15-at-12-43-48-aba00138.jpg", "https://i.postimg.cc/YqBmc8LW/Whats-App-Image-2025-09-15-at-12-43-49-7a70d870.jpg"], view360Url: "#" },
+            { id: 6, name: "Lachen Monastery", location: "North Sikkim", description: "The charm of Lachen Monastery lies not just in its traditional architecture but also in its dramatic alpine setting...", imageUrl: "https://i.postimg.cc/fT5WHvcZ/Whats-App-Image-2025-09-15-at-12-49-40-73a94566.jpg", galleryUrls: ["https://i.postimg.cc/fT5WHvcZ/Whats-App-Image-2025-09-15-at-12-49-40-73a94566.jpg", "https://i.postimg.cc/QNQd7DVF/Whats-App-Image-2025-09-15-at-12-49-40-88eec83f.jpg", "https://i.postimg.cc/BQJQcz1M/Whats-App-Image-2025-09-15-at-12-52-55-4e06d271.jpg"], view360Url: "#" },
+            { id: 7, name: "Lachung Monastery", location: "North Sikkim", description: "Perched on a scenic ridge overlooking the Lachung River, Lachung Monastery is another beautiful example of traditional high-altitude monastic architecture...", imageUrl: "https://i.postimg.cc/hGQStWHP/Whats-App-Image-2025-09-15-at-13-03-22-13f9c772.jpg", galleryUrls: ["https://i.postimg.cc/hGQStWHP/Whats-App-Image-2025-09-15-at-13-03-22-13f9c772.jpg", "https://i.postimg.cc/mDxTcps3/Whats-App-Image-2025-09-15-at-13-03-22-482d7677.jpg"], view360Url: "#" },
+            { id: 8, name: "Ralong Monastery", location: "South Sikkim", description: "The largest monastery in Sikkim, Ralong Monastery is a magnificent example of Tibetan Buddhist architecture...", imageUrl: "https://i.postimg.cc/Z5kHMr47/Whats-App-Image-2025-09-15-at-13-13-27-0b4664b5.jpg", galleryUrls: ["https://i.postimg.cc/Z5kHMr47/Whats-App-Image-2025-09-15-at-13-13-27-0b4664b5.jpg", "https://i.postimg.cc/wTRF2W8R/Whats-App-Image-2025-09-15-at-13-13-27-0d6cc3f1.jpg", "https://i.postimg.cc/dQx4GbXK/Whats-App-Image-2025-09-15-at-13-13-42-90a586f5.jpg"], view360Url: "#" },
+            { id: 9, name: "Sample", location: "Your Location", description: "This is a sample description for a new monastery template...", imageUrl: "https://i.postimg.cc/3w8vTK8P/OIP.jpg", hoverImageUrl: "https://i.postimg.cc/3w8vTK8P/OIP.jpg", galleryUrls: ["https://i.postimg.cc/3w8vTK8P/OIP.jpg"], view360Url: "internal-sample-tour" }
+        ];
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {};
+
+        // --- Firebase Initialization ---
+        let app = null;
+        let auth = null;
+        const hasFirebaseConfig = firebaseConfig && typeof firebaseConfig.apiKey === 'string' && firebaseConfig.apiKey.length > 0;
+        if (hasFirebaseConfig) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+            } catch (e) {
+                console.error('Firebase initialization failed.', e);
+                // Continue without auth rather than breaking the entire page
+                app = null;
+                auth = null;
+            }
+        } else {
+            console.warn('Firebase config missing. Continuing without authentication.');
+        }
+
+        // --- DOM Elements ---
+        const toast = document.getElementById('toast-notification');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginModal = document.getElementById('login-modal');
+        const signupModal = document.getElementById('signup-modal');
+        const userActions = document.getElementById('user-actions');
+        const userGreeting = document.getElementById('user-greeting');
+        const greetingText = document.getElementById('greeting-text');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const loginError = document.getElementById('login-error');
+        const signupError = document.getElementById('signup-error');
+        const mainContent = document.getElementById('main-content');
+        const discoverPage = document.getElementById('discover-page');
+        const monasteryGrid = document.getElementById('monastery-grid');
+        const detailModal = document.getElementById('detail-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const modalLocation = document.getElementById('modal-location');
+        const modalDescription = document.getElementById('modal-description');
+        const modalMainImage = document.getElementById('modal-main-image');
+        const modalThumbnailGallery = document.getElementById('modal-thumbnail-gallery');
+        const prevImageBtn = document.getElementById('prev-image-btn');
+        const nextImageBtn = document.getElementById('next-image-btn');
+        const sidebarContainer = document.getElementById('sidebar-container');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+        const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const heroSlidesContainer = document.getElementById('hero-slides-container');
+        const heroPrevBtn = document.getElementById('hero-prev-btn');
+        const heroNextBtn = document.getElementById('hero-next-btn');
+        const virtualTourBtn = document.getElementById('virtual-tour-btn');
+        const virtualToursPage = document.getElementById('virtual-tours-page');
+        const closeVtBtn = document.getElementById('close-vt-btn');
+        const vtGridContainer = document.getElementById('vt-grid-container');
+        const pannellumViewerPage = document.getElementById('pannellum-viewer-page');
+        const closePannellumBtn = document.getElementById('close-pannellum-btn');
+
+        // --- State ---
+        let slideshowImages = [];
+        let currentSlideIndex = 0;
+        let slideshowInterval;
+        let toastTimeout;
+        
+        // --- 360 Tour State ---
+        let pannellumViewer = null;
+
+        // --- Functions ---
+        const showToast = (message) => {
+            clearTimeout(toastTimeout);
+            toast.textContent = message;
+            toast.classList.add('show');
+            toast.classList.remove('translate-x-[calc(100%+20px)]');
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('translate-x-[calc(100%+20px)]');
+            }, 3000);
+        };
+
+        const initializeHeroSlideshow = () => {
+            slideshowImages = monasteries
+                .filter(m => !m.imageUrl.includes('placehold.co') && m.name !== 'Sample')
+                .flatMap(m => m.galleryUrls);
+
+            if (slideshowImages.length === 0) return;
+
+            heroSlidesContainer.innerHTML = '';
+            slideshowImages.forEach((url, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'h-full w-full flex-shrink-0 bg-cover bg-center';
+                slide.dataset.src = url;
+                if (index === 0) {
+                    slide.style.backgroundImage = `url('${url}')`;
+                }
+                heroSlidesContainer.appendChild(slide);
+            });
+
+            updateSlidePosition();
+            startSlideshowInterval();
+        };
+
+        const updateSlidePosition = () => {
+            if (slideshowImages.length > 0) {
+                const slides = heroSlidesContainer.children;
+                const nextSlide = slides[currentSlideIndex];
+                if (nextSlide && !nextSlide.style.backgroundImage) {
+                    nextSlide.style.backgroundImage = `url('${nextSlide.dataset.src}')`;
+                }
+                heroSlidesContainer.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            }
+        };
+        
+        const showNextSlide = () => {
+            currentSlideIndex = (currentSlideIndex + 1) % slideshowImages.length;
+            updateSlidePosition();
+        };
+
+        const showPrevSlide = () => {
+            currentSlideIndex = (currentSlideIndex - 1 + slideshowImages.length) % slideshowImages.length;
+            updateSlidePosition();
+        };
+
+        const startSlideshowInterval = () => {
+            if (slideshowInterval) clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(showNextSlide, 5000);
+        };
+
+        const showModal = (modal) => {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (modal.querySelector('.modal-content')) {
+                   modal.querySelector('.modal-content').classList.remove('scale-95');
+                }
+            }, 10);
+        };
+
+        const hideModal = (modal) => {
+            modal.classList.add('opacity-0');
+             if (modal.querySelector('.modal-content')) {
+                modal.querySelector('.modal-content').classList.add('scale-95');
+             }
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        
+        const showVirtualToursPage = () => {
+            showModal(virtualToursPage);
+            populateVirtualToursPage();
+        };
+
+        const hideVirtualToursPage = () => {
+            hideModal(virtualToursPage);
+        };
+        
+        const populateVirtualToursPage = () => {
+            const virtualTours = monasteries.filter(m => m.view360Url && m.view360Url === 'internal-sample-tour');
+            vtGridContainer.innerHTML = '';
+
+            if(virtualTours.length === 0) {
+                 vtGridContainer.innerHTML = `<div class="text-center text-gray-400 text-2xl mt-20">Work in progress...</div>`;
+            } else {
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
+                virtualTours.forEach(m => {
+                    const tourCard = document.createElement('div');
+                    tourCard.className = 'bg-gray-800 rounded-lg overflow-hidden relative group cursor-pointer';
+                    tourCard.innerHTML = `
+                        <img src="${m.hoverImageUrl || m.imageUrl}" alt="${m.name}" class="w-full h-60 object-cover opacity-60 group-hover:opacity-80 transition-opacity">
+                        <div class="absolute bottom-0 left-0 p-4">
+                            <h3 class="text-xl font-bold">${m.name}</h3>
+                        </div>
+                    `;
+                    tourCard.addEventListener('click', () => {
+                        if(m.view360Url === "internal-sample-tour") {
+                            showSample360Tour();
+                        }
+                    });
+                    grid.appendChild(tourCard);
+                });
+                vtGridContainer.appendChild(grid);
+            }
+        };
+
+        const updateUIForUser = (user) => {
+            if (user) { userActions.classList.add('hidden'); userGreeting.classList.remove('hidden'); greetingText.textContent = `Hi, ${user.email.split('@')[0]}`; } 
+            else { userActions.classList.remove('hidden'); userGreeting.classList.add('hidden'); greetingText.textContent = ''; }
+        };
+
+        const showDiscoverPage = () => { mainContent.classList.add('hidden'); discoverPage.classList.remove('hidden'); populateMonasteryGrid(); };
+        const showHomePage = () => { discoverPage.classList.add('hidden'); mainContent.classList.remove('hidden'); };
+
+        const populateMonasteryGrid = () => {
+            monasteryGrid.innerHTML = '';
+            monasteries.forEach(monastery => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-lg overflow-hidden group';
+                
+                const tourButtonHtml = (monastery.view360Url)
+                    ? `<button class="tour-button absolute top-2 right-2 bg-black/60 text-white text-xs font-bold py-1.5 px-3 rounded-full flex items-center hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                        360&deg; Tour
+                       </button>` : '';
+                
+                let imageHtml;
+                if (monastery.hoverImageUrl) {
+                    imageHtml = `<div class="relative detail-link cursor-pointer" data-id="${monastery.id}"><img src="${monastery.imageUrl}" alt="${monastery.name}" class="w-full h-52 object-cover sharp-image transition-opacity duration-300"><img src="${monastery.hoverImageUrl}" alt="${monastery.name}" class="absolute top-0 left-0 w-full h-52 object-cover sharp-image opacity-0 group-hover:opacity-100 transition-opacity duration-300" loading="lazy">${tourButtonHtml}</div>`;
+                } else {
+                    imageHtml = `<div class="relative detail-link cursor-pointer" data-id="${monastery.id}"><img src="${monastery.imageUrl}" alt="${monastery.name}" class="w-full h-52 object-cover sharp-image" loading="lazy">${tourButtonHtml}</div>`;
+                }
+
+                card.innerHTML = `${imageHtml}<div class="p-6 detail-link cursor-pointer" data-id="${monastery.id}"><h3 class="text-xl font-bold mb-2 theme-teal-text">${monastery.name}</h3><p class="text-gray-600">${monastery.location}</p></div>`;
+
+                card.querySelectorAll('.detail-link').forEach(el => { el.addEventListener('click', () => showDetailModal(monastery.id)); });
+                
+                const tourButton = card.querySelector('.tour-button');
+                if(tourButton) {
+                    tourButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (monastery.view360Url === 'internal-sample-tour') {
+                            showVirtualToursPage();
+                        } else {
+                            showToast("Work in progress!");
+                        }
+                    });
+                }
+                monasteryGrid.appendChild(card);
+            });
+        };
+
+        const updateSlideshowImage = () => {
+            const urls = JSON.parse(detailModal.dataset.gallery || '[]');
+            const index = parseInt(detailModal.dataset.index || '0', 10);
+            if (urls.length > 0) { modalMainImage.src = urls[index]; }
+            const thumbnails = modalThumbnailGallery.querySelectorAll('img');
+            thumbnails.forEach((thumb, i) => { thumb.classList.toggle('active-thumbnail', i === index); });
+        };
+        
+        const showDetailModal = (id) => {
+            const monastery = monasteries.find(m => m.id === id);
+            if (!monastery) return;
+            modalTitle.textContent = monastery.name;
+            modalLocation.textContent = monastery.location;
+            modalDescription.textContent = monastery.description;
+            detailModal.dataset.gallery = JSON.stringify(monastery.galleryUrls);
+            detailModal.dataset.index = "0";
+            
+            modalThumbnailGallery.innerHTML = '';
+            monastery.galleryUrls.forEach((url, index) => {
+                const thumbImg = document.createElement('img');
+                thumbImg.src = url;
+                thumbImg.alt = `Thumbnail ${index + 1}`;
+                thumbImg.loading = 'lazy';
+                thumbImg.className = 'w-24 h-20 object-cover rounded-md cursor-pointer flex-shrink-0 transition-all duration-200';
+                thumbImg.dataset.index = index;
+                thumbImg.addEventListener('click', () => { detailModal.dataset.index = index; updateSlideshowImage(); });
+                modalThumbnailGallery.appendChild(thumbImg);
+            });
+            
+            updateSlideshowImage(); 
+            
+            if (monastery.galleryUrls.length <= 1) { prevImageBtn.classList.add('hidden'); nextImageBtn.classList.add('hidden'); } 
+            else { prevImageBtn.classList.remove('hidden'); nextImageBtn.classList.remove('hidden'); }
+            showModal(detailModal);
+        };
+
+        const openSidebar = () => {
+            sidebarContainer.classList.remove('hidden');
+            setTimeout(() => { sidebarOverlay.classList.remove('opacity-0'); sidebar.classList.remove('-translate-x-full'); }, 10);
+        };
+
+        const closeSidebar = () => {
+            sidebarOverlay.classList.add('opacity-0');
+            sidebar.classList.add('-translate-x-full');
+            setTimeout(() => { sidebarContainer.classList.add('hidden'); }, 300);
+        };
+        
+        // --- 360 Tour Functions ---
+        const sampleTourData = {
+            // For best quality, replace these with multires tiles. See README for instructions.
+            images: [
+                { type: 'equirectangular', url: "https://i.postimg.cc/7PdzFnrr/Stair.jpg" },
+                { type: 'equirectangular', url: "https://i.postimg.cc/m299B1Tz/Ext-iifr.jpg" },
+                { type: 'equirectangular', url: "https://i.postimg.cc/NfndPHpK/Iifr-entr.jpg" },
+                { type: 'equirectangular', url: "https://i.postimg.cc/Hnq7bd9k/Isk-1.jpg" }
+            ],
+             hotspotPositions: [
+                { frontYaw: 270, frontPitch: 5, backYaw: null, backPitch: null },
+                { frontYaw: 270, frontPitch: 0, backYaw: 90, backPitch: 5 },
+                { frontYaw: 270, frontPitch: 0, backYaw: 90, backPitch: 10 },
+                { frontYaw: null, frontPitch: null, backYaw: 260, backPitch: 0 }
+            ]
+        };
+
+        function createArrowHotSpot(hotSpotDiv, args) {
+            hotSpotDiv.classList.add('arrow-hotspot-custom');
+            const arrowSVG = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L10 8.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>`;
+            hotSpotDiv.innerHTML = arrowSVG;
+            if(args.dir === 'front') {
+                hotSpotDiv.style.transform = 'rotate(-90deg)';
+            } else {
+                hotSpotDiv.style.transform = 'rotate(90deg)';
+            }
+        }
+        
+        const showSample360Tour = () => {
+            hideVirtualToursPage();
+            pannellumViewerPage.classList.remove('hidden');
+            
+            if (pannellumViewer) { pannellumViewer.destroy(); }
+            
+            const scenes = {};
+            sampleTourData.images.forEach((img, idx) => {
+                const sceneId = `scene${idx}`;
+                const pos = sampleTourData.hotspotPositions[idx];
+                const sceneHotspots = [];
+
+                if (pos.frontYaw !== null && idx < sampleTourData.images.length - 1) {
+                    sceneHotspots.push({ pitch: pos.frontPitch, yaw: pos.frontYaw, type: 'scene', sceneId: `scene${idx + 1}`, cssClass: 'arrow-hotspot-custom', createTooltipFunc: createArrowHotSpot, createTooltipArgs: { dir: 'front' } });
+                }
+                if (pos.backYaw !== null && idx > 0) {
+                    sceneHotspots.push({ pitch: pos.backPitch, yaw: pos.backYaw, type: 'scene', sceneId: `scene${idx - 1}`, cssClass: 'arrow-hotspot-custom', createTooltipFunc: createArrowHotSpot, createTooltipArgs: { dir: 'back' } });
+                }
+
+                // Support both equirectangular and multires scenes
+                if (img.type === 'multires' && img.multiRes) {
+                    scenes[sceneId] = {
+                        type: 'multires',
+                        multiRes: img.multiRes,
+                        hotSpots: sceneHotspots,
+                        showZoomCtrl: true
+                    };
+                } else {
+                    scenes[sceneId] = {
+                        type: 'equirectangular',
+                        panorama: img.url || img,
+                        crossOrigin: 'anonymous',
+                        hotSpots: sceneHotspots
+                    };
+                }
+            });
+
+            pannellumViewer = pannellum.viewer('panorama', {
+                default: {
+                    firstScene: 'scene0',
+                    sceneFadeDuration: 1000,
+                    hfov: 70,
+                    minHfov: 50,
+                    maxHfov: 110
+                },
+                scenes: scenes,
+                autoLoad: true,
+                showControls: true,
+                keyboardZoom: true,
+                mouseZoom: true,
+                autoRotate: 0,
+                // Render more pixels on HiDPI screens for sharper output
+                maxPixelRatio: Math.min(window.devicePixelRatio || 1, 2.5)
+            });
+            
+            pannellumViewer.on('load', () => {
+                const currentSceneId = pannellumViewer.getScene();
+                const idx = parseInt(currentSceneId.replace('scene', ''));
+                updateCounter(idx);
+                // Ensure consistent field of view on scene load
+                try { pannellumViewer.setHfov(70, false); } catch(_) {}
+                // Preload the next image for smoother transition
+                if (idx + 1 < sampleTourData.images.length) {
+                    const nextImg = sampleTourData.images[idx + 1];
+                    const src = nextImg.url || nextImg;
+                    if (typeof src === 'string') { new Image().src = src; }
+                }
+            });
+
+            pannellumViewer.on('scenechange', (sceneId) => {
+                const idx = parseInt(sceneId.replace('scene', ''));
+                updateCounter(idx);
+                // Reset FOV on each scene change to avoid auto-zoom effect
+                try { pannellumViewer.setHfov(70, false); } catch(_) {}
+            });
+
+            function updateCounter(idx) {
+                document.getElementById('imgCounter').textContent = `Image ${idx + 1} / ${sampleTourData.images.length}`;
+            }
+        };
+        
+        const hideSample360Tour = () => {
+            if (pannellumViewer) { pannellumViewer.destroy(); pannellumViewer = null; }
+            pannellumViewerPage.classList.add('hidden');
+            showVirtualToursPage();
+        };
+
+        // --- Event Listeners ---
+        loginBtn.addEventListener('click', () => showModal(loginModal));
+        signupBtn.addEventListener('click', () => showModal(signupModal));
+        document.querySelectorAll('.modal-close-btn').forEach(btn => { btn.addEventListener('click', (e) => hideModal(e.target.closest('.modal'))); });
+        [loginModal, signupModal, detailModal, sidebarOverlay].forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target === el) {
+                    if (el.id.includes('modal')) hideModal(el);
+                    if (el.id.includes('overlay')) closeSidebar();
+                }
+            });
+        });
+        modalCloseBtn.addEventListener('click', () => hideModal(detailModal));
+        nextImageBtn.addEventListener('click', () => {
+            const urls = JSON.parse(detailModal.dataset.gallery || '[]');
+            if (urls.length <= 1) return;
+            let index = parseInt(detailModal.dataset.index || '0', 10);
+            index = (index + 1) % urls.length;
+            detailModal.dataset.index = index;
+            updateSlideshowImage();
+        });
+        prevImageBtn.addEventListener('click', () => {
+            const urls = JSON.parse(detailModal.dataset.gallery || '[]');
+            if (urls.length <= 1) return;
+            let index = parseInt(detailModal.dataset.index || '0', 10);
+            index = (index - 1 + urls.length) % urls.length;
+            detailModal.dataset.index = index;
+            updateSlideshowImage();
+        });
+        heroNextBtn.addEventListener('click', () => { showNextSlide(); startSlideshowInterval(); });
+        heroPrevBtn.addEventListener('click', () => { showPrevSlide(); startSlideshowInterval(); });
+        virtualTourBtn.addEventListener('click', showVirtualToursPage);
+        closeVtBtn.addEventListener('click', hideVirtualToursPage);
+        closePannellumBtn.addEventListener('click', hideSample360Tour);
+
+        if (auth) {
+            onAuthStateChanged(auth, user => updateUIForUser(user));
+            loginForm.addEventListener('submit', (e) => { e.preventDefault(); signInWithEmailAndPassword(auth, loginForm['login-email'].value, loginForm['login-password'].value).then(() => { hideModal(loginModal); loginForm.reset(); loginError.textContent = ''; }).catch(error => { loginError.textContent = error.message; }); });
+            signupForm.addEventListener('submit', (e) => { e.preventDefault(); createUserWithEmailAndPassword(auth, signupForm['signup-email'].value, signupForm['signup-password'].value).then(() => { hideModal(signupModal); signupForm.reset(); signupError.textContent = ''; }).catch(error => { signupError.textContent = error.message; }); });
+            logoutBtn.addEventListener('click', () => signOut(auth));
+        }
+
+        document.getElementById('discover-link-sidebar').addEventListener('click', (e) => { e.preventDefault(); showDiscoverPage(); closeSidebar(); });
+        document.getElementById('home-link-sidebar').addEventListener('click', (e) => { e.preventDefault(); showHomePage(); closeSidebar(); });
+        sidebarOpenBtn.addEventListener('click', openSidebar);
+        sidebarCloseBtn.addEventListener('click', closeSidebar);
+        mobileMenuBtn.addEventListener('click', openSidebar);
+
+        // --- Initializations ---
+        document.addEventListener('DOMContentLoaded', initializeHeroSlideshow);
+    </script>
+</body>
+</html>
+
+
